@@ -1,83 +1,68 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>สุ่มแก้ว</title>
+  <meta charset="UTF-8" />
+  <title>ระบบสุ่มแก้ว</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: sans-serif;
       text-align: center;
-      padding-top: 100px;
-      background-color: #f3f3f3;
+      padding: 50px;
+      background: #f0f0f0;
     }
-
-    button {
-      padding: 10px 20px;
-      font-size: 1.2em;
-      border: none;
-      border-radius: 8px;
-      background-color: #4CAF50;
-      color: white;
-      cursor: pointer;
-      transition: background-color 0.3s;
+    #result {
+      font-size: 2rem;
+      margin-top: 20px;
     }
-
-    button:hover {
-      background-color: #45a049;
-    }
-
-    #cup-area {
-      margin-top: 30px;
-      font-size: 3em;
-    }
-
     #message {
-      margin-top: 40px;
-      font-size: 1.5em;
-      color: #e91e63;
-      animation: fade 0.5s ease-in-out;
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      color: black;
+      font-size: 2rem;
+      padding: 1rem 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      z-index: 9999;
     }
-
-    @keyframes fade {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
+    button {
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-  <h1>ดึงแก้วออกจากกล่อง 🍹</h1>
-  <button onclick="drawCup()">ดึงแก้ว!</button>
-
-  <div id="cup-area"></div>
-  <div id="message"></div>
+  <h1>กดสุ่มแก้ว</h1>
+  <button onclick="rollCup()">สุ่ม!</button>
+  <div id="result"></div>
+  <div id="message">โชคร้ายหรือโชคดีเนี่ย 555</div>
 
   <script>
-    const totalCups = 5;
-    let drawnCups = [];
+    function rollCup() {
+      const weightedCups = [
+        1,1,1,1,1,1,1,1, // 1 แก้ว = 8/30
+        2,2,2,2,2,2,     // 2 แก้ว = 6/30
+        3,3,3,3,         // 3 แก้ว = 4/30
+        4,4,4,           // 4 แก้ว = 3/30
+        5,               // 5 แก้ว = 1/30
+        2,3,4,1,         // เสริมบาลานซ์ (แล้วแต่จะครีเอต)
+        1,2              // เติมให้ครบ 30
+      ];
 
-    function drawCup() {
-      const messageBox = document.getElementById("message");
-      messageBox.innerText = ""; // เคลียร์ข้อความก่อน
+      const cupCount = weightedCups[Math.floor(Math.random() * weightedCups.length)];
+      document.getElementById("result").textContent = `ได้ ${cupCount} แก้ว`;
 
-      if (drawnCups.length >= totalCups) {
-        messageBox.innerText = "ไม่มีแก้วเหลือแล้วนะ!";
-        return;
-      }
-
-      // โอกาสสำเร็จแบบยากขึ้นเรื่อย ๆ
-      const chance = 1 / (totalCups - drawnCups.length);
-      const rand = Math.random();
-
-      if (rand <= chance) {
-        drawnCups.push("🥤");
-        document.getElementById("cup-area").innerText = drawnCups.join(" ");
-
-        if (drawnCups.length === totalCups) {
-          messageBox.innerText = "โชคร้ายหรือโชคดีเนี่ย555";
-        }
-      } else {
-        messageBox.innerText = "พลาด! ลองใหม่อีกทีนะ 😅";
+      if (cupCount === 5) {
+        const msg = document.getElementById("message");
+        msg.style.display = "block";
+        setTimeout(() => {
+          msg.style.display = "none";
+        }, 2500);
       }
     }
   </script>
