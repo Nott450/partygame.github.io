@@ -19,6 +19,7 @@
             justify-content: center;
             align-items: center;
             color: white;
+            overflow: hidden; /* ป้องกัน scrollbar เมื่อมี confetti */
         }
 
         .game-container {
@@ -31,6 +32,8 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             max-width: 500px;
             width: 90%;
+            position: relative; /* สำคัญสำหรับข้อความลอย */
+            z-index: 1; /* ให้เกมอยู่บน confetti */
         }
 
         h1 {
@@ -221,6 +224,38 @@
             50% { transform: scale(1.05) rotate(1deg); }
             75% { transform: scale(1.08) rotate(-1deg); }
         }
+
+        /* เพิ่ม CSS สำหรับข้อความลอย */
+        .floating-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #f39c12; /* สีเดียวกับขอบ 5 แก้ว */
+            padding: 25px 40px;
+            border-radius: 15px;
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+            z-index: 1001; /* ให้อยู่เหนือ confetti */
+            border: 3px solid #f39c12;
+            box-shadow: 0 0 20px rgba(243, 156, 18, 0.7);
+        }
+
+        .floating-message.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.1);
+            animation: pulse-message 0.8s infinite alternate;
+        }
+
+        @keyframes pulse-message {
+            from { transform: translate(-50%, -50%) scale(1.1); }
+            to { transform: translate(-50%, -50%) scale(1.05); }
+        }
     </style>
 </head>
 <body>
@@ -256,6 +291,10 @@
 
     <div class="celebration" id="celebration"></div>
 
+    <div class="floating-message" id="floatingMessage">
+        โชคดีหรือโชคร้ายเนี่ย555
+    </div>
+
     <script>
         const drinks = [
             { emoji: '🍺', name: 'เบียร์', color: '#f39c12' },
@@ -275,6 +314,10 @@
             const result = document.getElementById('result');
             const drinkBox = document.getElementById('drinkBox');
             const glassBox = document.getElementById('glassBox');
+            const floatingMessage = document.getElementById('floatingMessage'); // ดึง element ข้อความลอย
+
+            // ซ่อนข้อความลอยเผื่อมีการเปิดใหม่
+            floatingMessage.classList.remove('show');
             
             revealBtn.disabled = true;
             revealBtn.textContent = '🔮 กำลังเปิดปริศนา...';
@@ -335,6 +378,11 @@
                     // ถ้าได้ 5 แก้วจะมี confetti
                     if (glassCount === 5) {
                         createConfetti();
+                        // แสดงข้อความลอย
+                        floatingMessage.classList.add('show');
+                        setTimeout(() => {
+                            floatingMessage.classList.remove('show'); // ซ่อนข้อความหลังจาก 3 วินาที
+                        }, 3000); 
                     }
                     
                     // เปิดใช้งานปุ่มอีกครั้ง
