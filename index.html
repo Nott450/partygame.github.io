@@ -1,71 +1,427 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <title>ระบบสุ่มแก้ว</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding: 50px;
-      background: #f0f0f0;
-    }
-    #result {
-      font-size: 2rem;
-      margin-top: 20px;
-    }
-    #message {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: white;
-      color: black;
-      font-size: 2rem;
-      padding: 1rem 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 0 20px rgba(0,0,0,0.2);
-      z-index: 9999;
-    }
-    button {
-      padding: 1rem 2rem;
-      font-size: 1.2rem;
-      cursor: pointer;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมปริศนาเปิดไผ่ปาร์ตี้</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px #fff; }
+            to { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 0 0 20px #fff, 0 0 30px #fff; }
+        }
+
+        .mystery-boxes {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .mystery-box {
+            width: 150px;
+            height: 180px;
+            background: linear-gradient(145deg, #1a1a1a, #000);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 4em;
+            border: 3px solid #444;
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        .mystery-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .mystery-box:hover::before {
+            transform: translateX(100%);
+        }
+
+        .mystery-box.hidden {
+            color: #666;
+            background: linear-gradient(145deg, #1a1a1a, #000);
+        }
+
+        .mystery-box.revealed {
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            border-color: #3498db;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 12px 30px rgba(52, 152, 219, 0.4);
+        }
+
+        .mystery-box.revealed.drink {
+            border-color: #e74c3c;
+            box-shadow: 0 12px 30px rgba(231, 76, 60, 0.4);
+        }
+
+        .mystery-box.revealed.glass {
+            border-color: #f39c12;
+            box-shadow: 0 12px 30px rgba(243, 156, 18, 0.4);
+        }
+
+        .box-label {
+            font-size: 0.4em;
+            margin-top: 10px;
+            color: #bdc3c7;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .reveal-button {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .reveal-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+        }
+
+        .reveal-button:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .reveal-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            border-left: 5px solid #3498db;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .result h2 {
+            color: #3498db;
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+
+        .result p {
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+
+        .drinks-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            font-size: 0.9em;
+            color: #bdc3c7;
+        }
+
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #3498db;
+            animation: confetti-fall 3s linear infinite;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .suspense {
+            animation: suspense 1s ease-in-out;
+        }
+
+        @keyframes suspense {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.1) rotate(-2deg); }
+            50% { transform: scale(1.05) rotate(1deg); }
+            75% { transform: scale(1.08) rotate(-1deg); }
+        }
+    </style>
 </head>
 <body>
+    <div class="game-container">
+        <h1>🎋 เกมปริศนาเปิดไผ่ 🎭</h1>
+        
+        <div class="mystery-boxes">
+            <div class="mystery-box hidden" id="drinkBox">
+                <div>❓</div>
+                <div class="box-label">เครื่องดื่ม</div>
+            </div>
+            <div class="mystery-box hidden" id="glassBox">
+                <div>❓</div>
+                <div class="box-label">จำนวนแก้ว</div>
+            </div>
+        </div>
+        
+        <button class="reveal-button" id="revealBtn" onclick="revealMystery()">
+            🎋 เปิดไผ่ 🔮
+        </button>
+        
+        <div class="result" id="result">
+            <h2>🎯 พร้อมเปิดปริศนาแล้ว</h2>
+            <p>กดปุ่ม "เปิดไผ่" เพื่อเปิดเผยความลับในกล่องปริศนา!</p>
+        </div>
+        
+        <div class="drinks-info">
+            <strong>🎭 วิธีเล่น:</strong><br>
+            กดปุ่มเปิดไผ่เพื่อเปิดเผยเครื่องดื่มและจำนวนแก้วที่ซ่อนอยู่ในกล่องปริศนา<br>
+            <strong>🍸 เครื่องดื่มที่อาจได้:</strong> โซจู, เหล้า, เบียร์, น้ำมะนาว
+        </div>
+    </div>
 
-  <h1>กดสุ่มแก้ว</h1>
-  <button onclick="rollCup()">สุ่ม!</button>
-  <div id="result"></div>
-  <div id="message">โชคร้ายหรือโชคดีเนี่ย 555</div>
+    <div class="celebration" id="celebration"></div>
 
-  <script>
-    function rollCup() {
-      const weightedCups = [
-        1,1,1,1,1,1,1,1, // 1 แก้ว = 8/30
-        2,2,2,2,2,2,     // 2 แก้ว = 6/30
-        3,3,3,3,         // 3 แก้ว = 4/30
-        4,4,4,           // 4 แก้ว = 3/30
-        5,               // 5 แก้ว = 1/30
-        2,3,4,1,         // เสริมบาลานซ์ (แล้วแต่จะครีเอต)
-        1,2              // เติมให้ครบ 30
-      ];
+    <script>
+        const drinks = [
+            { emoji: '🍺', name: 'เบียร์', color: '#f39c12' },
+            { emoji: '🥃', name: 'โซจู', color: '#3498db' },
+            { emoji: '🍻', name: 'เหล้า', color: '#e74c3c' },
+            { emoji: '🍋', name: 'น้ำมะนาว', color: '#2ecc71' }
+        ];
 
-      const cupCount = weightedCups[Math.floor(Math.random() * weightedCups.length)];
-      document.getElementById("result").textContent = `ได้ ${cupCount} แก้ว`;
+        let isRevealing = false;
+        let gameState = 'ready'; // ready, revealed
 
-      if (cupCount === 5) {
-        const msg = document.getElementById("message");
-        msg.style.display = "block";
-        setTimeout(() => {
-          msg.style.display = "none";
-        }, 2500);
-      }
-    }
-  </script>
+        function revealMystery() {
+            if (isRevealing) return;
+            
+            isRevealing = true;
+            const revealBtn = document.getElementById('revealBtn');
+            const result = document.getElementById('result');
+            const drinkBox = document.getElementById('drinkBox');
+            const glassBox = document.getElementById('glassBox');
+            
+            revealBtn.disabled = true;
+            revealBtn.textContent = '🔮 กำลังเปิดปริศนา...';
+            
+            // เพิ่มเอฟเฟกต์ suspense
+            drinkBox.classList.add('suspense');
+            glassBox.classList.add('suspense');
+            
+            // แสดงข้อความแบบค่อยๆ ปรากฏ
+            result.innerHTML = '<h2>🔮 กำลังเปิดเผยความลับ...</h2><p>⏳ กรุณารอสักครู่...</p>';
+            
+            setTimeout(() => {
+                // สุ่มเครื่องดื่ม
+                const randomDrink = drinks[Math.floor(Math.random() * drinks.length)];
+                
+                // *******************************************************************
+                // ส่วนที่แก้ไข: ปรับการสุ่มจำนวนแก้วให้ยิ่งเยอะยิ่งได้ยาก
+                let glassCount;
+                const rand = Math.random(); // สุ่มตัวเลข 0 ถึง 1
 
+                if (rand < 0.40) { // 40%
+                    glassCount = 1;
+                } else if (rand < 0.70) { // 30% (จาก 0.40 ถึง 0.70)
+                    glassCount = 2;
+                } else if (rand < 0.85) { // 15% (จาก 0.70 ถึง 0.85)
+                    glassCount = 3;
+                } else if (rand < 0.95) { // 10% (จาก 0.85 ถึง 0.95)
+                    glassCount = 4;
+                } else { // 5% (จาก 0.95 ถึง 1.00)
+                    glassCount = 5;
+                }
+                // *******************************************************************
+
+                const glassEmojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'];
+                
+                // เปิดเผยกล่องเครื่องดื่ม
+                drinkBox.classList.remove('hidden', 'suspense');
+                drinkBox.classList.add('revealed', 'drink');
+                drinkBox.innerHTML = `
+                    <div>${randomDrink.emoji}</div>
+                    <div class="box-label">${randomDrink.name}</div>
+                `;
+                drinkBox.style.borderColor = randomDrink.color;
+                drinkBox.style.boxShadow = `0 12px 30px ${randomDrink.color}40`;
+                
+                setTimeout(() => {
+                    // เปิดเผยกล่องจำนวนแก้ว
+                    glassBox.classList.remove('hidden', 'suspense');
+                    glassBox.classList.add('revealed', 'glass');
+                    glassBox.innerHTML = `
+                        <div>${glassEmojis[glassCount - 1]}</div>
+                        <div class="box-label">${glassCount} แก้ว</div>
+                    `;
+                    
+                    // แสดงผลลัพธ์
+                    displayResult(randomDrink, glassCount);
+                    
+                    // ถ้าได้ 5 แก้วจะมี confetti
+                    if (glassCount === 5) {
+                        createConfetti();
+                    }
+                    
+                    // เปิดใช้งานปุ่มอีกครั้ง
+                    setTimeout(() => {
+                        isRevealing = false;
+                        revealBtn.disabled = false;
+                        revealBtn.textContent = '🎋 เปิดไผ่ใหม่ 🔮';
+                        gameState = 'revealed';
+                    }, 1000);
+                    
+                }, 800);
+                
+            }, 1500);
+        }
+        
+        function displayResult(drink, glassCount) {
+            const result = document.getElementById('result');
+            let message = '';
+            let isSpecial = false;
+            
+            if (glassCount === 5) {
+                message = `🎉 โชคดีมาก! ได้ ${drink.name} ถึง 5 แก้วเลย!`;
+                isSpecial = true;
+            } else if (glassCount === 1) {
+                message = `😅 ได้แค่ ${drink.name} 1 แก้ว แต่ก็ดีแล้วล่ะ!`;
+            } else {
+                message = `🍻 เยี่ยม! ได้ ${drink.name} ${glassCount} แก้ว`;
+            }
+            
+            result.innerHTML = `
+                <h2>${message}</h2>
+                <p style="font-size: 1.3em; color: #3498db; margin: 10px 0;">
+                    ${drink.emoji} ${drink.name} × ${glassCount} แก้ว 🥤
+                </p>
+                <p>
+                    ${isSpecial ? '🎆 โชคดีสุดๆ! ได้เต็มที่เลย!' : 'ขอให้สนุกกับปาร์ตี้นะ! 🎉'}
+                </p>
+            `;
+            
+            if (isSpecial) {
+                result.style.background = 'linear-gradient(45deg, rgba(52, 152, 219, 0.3), rgba(155, 89, 182, 0.3))';
+                result.style.borderLeftColor = '#f39c12';
+                result.style.animation = 'glow 1s ease-in-out infinite alternate';
+            } else {
+                result.style.background = 'rgba(255, 255, 255, 0.1)';
+                result.style.borderLeftColor = '#3498db';
+                result.style.animation = 'none';
+            }
+        }
+        
+        function createConfetti() {
+            const celebration = document.getElementById('celebration');
+            celebration.innerHTML = '';
+            
+            const colors = ['#3498db', '#e74c3c', '#f39c12', '#2ecc71', '#9b59b6', '#1abc9c'];
+            
+            for (let i = 0; i < 30; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 2 + 's';
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                celebration.appendChild(confetti);
+            }
+            
+            setTimeout(() => {
+                celebration.innerHTML = '';
+            }, 4000);
+        }
+        
+        // รีเซ็ตเกมเมื่อกดปุ่มอีกครั้งหลังจากเปิดเผยแล้ว
+        document.getElementById('revealBtn').addEventListener('click', function() {
+            if (gameState === 'revealed' && !isRevealing) {
+                // รีเซ็ตกล่องปริศนา
+                const drinkBox = document.getElementById('drinkBox');
+                const glassBox = document.getElementById('glassBox');
+                
+                drinkBox.className = 'mystery-box hidden';
+                drinkBox.innerHTML = '<div>❓</div><div class="box-label">เครื่องดื่ม</div>';
+                
+                glassBox.className = 'mystery-box hidden';
+                glassBox.innerHTML = '<div>❓</div><div class="box-label">จำนวนแก้ว</div>';
+                
+                gameState = 'ready';
+            }
+        });
+    </script>
 </body>
 </html>
